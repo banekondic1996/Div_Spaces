@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame and Sidebar</title>
+    <style>
+     body{
+        margin:0px;
+        padding: 0px;
+        background: gray;
+     }
+        /* Add your CSS styles here */
+        #frame {
+            display: flex;
+            width: 70%;
+            min-width:400px;
+            height: 500px;
+        }
+button {
+    width: 32px;
+    height: 32px;
+    text-align: revert;
+    padding: 0px;
+    margin-bottom: 6px;
+    border-radius: 5px;  
+    border: none;  
+}
+button:hover{
+    background: silver;
+}
+input[type="color"] {
+    width: 32px;
+    border-radius: 5px;  
+}
+input{
+    margin-bottom: 2px;
+}
+        #sidebar {
+            height: 97vh;
+            float: left;
+            padding: 10px;
+            width: 32px;
+  display: grid;
+  background-color: rgb(66, 66, 66);
+  align-content: center;
+  /*margin-right:5px;*/
+        }
+        #frame-content {
+            z-index: 2;
+            width: -webkit-fill-available;
+            height: -webkit-fill-available;
+            display: block;
+            position: absolute;
+            margin: 0px 20px 0px 0px;
+            overflow: auto;
+        }
+
+        #html-editor {
+            width: 85%;
+            height: calc(60vh - 97px);
+            border: 1px solid #000;
+            margin-top: 10px;
+            border-radius:10px;
+
+        }
+
+        #css-editor {
+            width: 85%;
+            height: 40vh;
+            border: 1px solid #000;
+            margin-top: 10px;
+            border-radius:10px;    
+        }
+        .contextMenu{
+            top:0px;
+            left:0px;
+            width: auto;
+            height:32px;
+            background-color:rgb(66, 66, 66);
+            display:none;
+            position: absolute;
+            padding:1px;
+        }
+        .contextMenu button{
+            margin-left: 5px;
+        }
+
+        /* ---------------------Ruler styles------------------------ */
+            #container {
+                background: white;
+                width: 100%;
+                height: 86vh;
+                position: relative;
+                padding: 20px 0px 0px 0px;
+                resize: both;
+                margin: 10px;
+                border: 2px solid black;
+                overflow: hidden;
+                border-radius: 10px;
+        }
+
+        .ruler {
+            position: absolute;
+            cursor: pointer;
+            z-index:999;
+        }
+
+        #ruler-x {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 18px;
+            background:rgb(66, 66, 66);
+            border-bottom: 3px solid #9a9a9a;
+        }
+
+        #ruler-y {
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 18px;
+            background:rgb(66, 66, 66);
+            border-left: 3px solid #9a9a9a;
+        }
+
+        .guideline {
+            position: absolute;
+            background-color: cyan; /* Set the guideline color */
+            z-index:999;
+        }
+
+        .guideline-x {
+            width: 100%;
+            height: 1px;
+            cursor: row-resize;
+        }
+
+        .guideline-y {
+            height: 100%;
+            width: 1px;
+            cursor: col-resize;
+        }
+        /*------------------------Ruler styles end------------------------*/
+        .theGrid{
+            z-index: 1;
+            position: absolute;
+            width: -webkit-fill-available;
+            height: -webkit-fill-available;
+            margin: 0px 20px 0px 0px;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <div style="color:white;">Add:</div>
+        <button id="text-btn">TxT</button>
+        <button id="div-btn">Div</button>
+        <button>
+            <label for="image-input" class="btn">Img</label>
+            <input type="file" id="image-input" style="opacity: 0;">
+        </button>
+        <div style="color:white;">Other:</div>
+        <button id="saveButton">SV</button>
+
+        <!---<input type="color" id="color-picker"> -->
+    </div>
+    
+        <div id="frame">
+            <div id="container"><svg class="theGrid" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="smallGrid" width="8" height="8" patternUnits="userSpaceOnUse">
+                    <path d="M 8 0 L 0 0 0 8" fill="none" stroke="gray" stroke-width="0.5"/>
+                  </pattern>
+                  <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+                    <rect width="80" height="80" fill="url(#smallGrid)"/>
+                    <path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+              </svg>
+            <iframe id="frame-content" src="testForFrame2.html" style="z-index: 2;display: block;position:absolute;" partition="trusted" type=""></iframe>
+            <div id="ruler-x" class="ruler"></div>
+            <div id="ruler-y" class="ruler"></div>
+        </div>
+        </div>
+       
+    </div>
+<!-- --------------Context Menus------------------- -->
+    <!-- <div id="contextMenuId2" class="contextMenu">
+        <button id="text-btn">TxT</button>
+        <button id="div-btn">Div</button>
+        <button id="table-btn">Tbl</button>
+        <button id="saveButton">SV</button>
+        <button>
+            <label for="image-input" class="btn">Img</label>
+            <input type="file" id="image-input" style="opacity: 0;">
+        </button>
+    </div> -->
+
+    <!-- <div id="contextMenuId" class="contextMenu">
+        <button>
+            <label for="color-picker" class="btn">Clr</label>
+            <input type="color" id="color-picker" style="opacity: 0;">
+    </button> 
+        <button onclick="selectedElement.remove();console.log('removed');console.log(selectedElement);">RM</button>
+        <button>CP</button>
+    </div> -->
+<!-- --------------Context Menus END------------------- -->
+    <div id="sidebar2" style="position: absolute; right: 0px; width:100px; display: flex; top: 0px; background: gray; height: 100%; flex-direction: column;">
+        <textarea id="css-editor" placeholder="CSS Editor"></textarea><textarea id="html-editor" placeholder="HTML Editor" style=""></textarea>
+    </div>
+    <input type="file" nwsaveas>
+    <script>
+        const frame = document.getElementById('frame-content');
+        const htmlEditor = document.getElementById('html-editor');
+        const cssEditor = document.getElementById('css-editor');
+        const textButton = document.getElementById('text-btn');
+        const divButton = document.getElementById('div-btn');
+        const imageInput = document.getElementById('image-input');
+        /* const colorPicker = document.getElementById('color-picker'); */
+ /*        const contextM=document.getElementById('contextMenuId');
+        const contextMG=document.getElementById('contextMenuId2'); */
+        const siderbar2=document.getElementById('sidebar2');
+        var frameDocument = frame.contentDocument;
+        var selectedElement = null;
+
+//---------------------------drag space-----------------------------
+
+
+//------------------------drag space ends----------------------------
+        console.log("checkpoint 1");
+        textButton.addEventListener('click', () => {
+            const text = prompt('Enter text to add:');
+            const frameDocument = frame.contentDocument;
+            frameDocument.body.innerHTML += `<p>${text}</p>`;
+            
+            // Update the HTML edit window
+            htmlEditor.value = frameDocument.documentElement.innerHTML;
+        });
+  /*       colorPicker.addEventListener('input', () => {
+                console.log(selectedElement);
+                selectedElement.style.backgroundColor = colorPicker.value;
+        }); */
+        frame.onload = function() {
+            var iframeDoc = frame.contentDocument || frame.contentWindow.document;
+            var cssFormatedText;
+            console.log("frame loaded");
+            // Add a click event listener to the iframe document
+            iframeDoc.addEventListener('click', function(event) {
+               /*  contextM.style.display='none';
+                contextMG.style.display='none'; */
+                // Check if the clicked element is the type you want to target (e.g., "div")
+                if (event.target.tagName.toLowerCase() === 'div') {
+                    //var selectedColor = colorPicker.value;
+                    selectedElement=event.target;
+                    console.log("element selected")
+                    console.log(selectedElement);
+                    cssFormatedText=" "+selectedElement.style.cssText.replaceAll(';',';\n');
+                    cssEditor.value=cssFormatedText;
+                }
+            });
+            console.log("checkpoint 2");
+            //contextMenu section
+           /*  if (iframeDoc.addEventListener) {
+                iframeDoc.addEventListener('contextmenu', function(e) {
+                    if (event.target.tagName.toLowerCase() === 'div') {
+                        selectedElement=e.target;
+                        console.log("You've tried to open context menu"+e.clientY); //here you draw your own menu 
+                        if(e.clientY-40<0){
+                        contextM.style.top=e.clientY-10+'px';
+                        contextM.style.left=e.clientX+80+'px';
+                        }
+                        else{
+                        contextM.style.top=e.clientY-40+'px';
+                        contextM.style.left=e.clientX+'px';
+                        }
+                        contextM.style.display='flex';
+                e.preventDefault();
+                    }
+                    else{
+                        e.preventDefault();
+                        contextMG.style.top=e.clientY-40+'px';
+                        contextMG.style.left=e.clientX+'px';
+                        contextMG.style.display='flex';
+                    }
+                    
+                }, false);
+                } else {
+                    iframeDoc.attachEvent('oncontextmenu', function() {
+                    alert("You've tried to open context menu");
+                    window.event.returnValue = false;
+                });
+                }*/
+            }; 
+            //contextMenu section end
+            //Save section
+        saveButton.addEventListener('click', function () {
+        saveEdits();
+        //Save section end
+    });
+    console.log("checkpoint 3");
+    function saveEdits(){
+        const blob = new Blob([htmlEditor.value], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'saved_code.html';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    console.log("checkpoint 4");
+//div create section
+        divButton.addEventListener('click', () => {
+            frameDocument = frame.contentDocument;
+            const div = document.createElement('div');
+            /* contextMG.style.display='none';
+            div.top=contextMG.style.top;
+            div.left=contextMG.style.left;
+            console.log(contextMG.style.top); */
+            div.textContent = 'element';
+            div.style="position:absolute;resize:both;cursor:move;overflow:hidden;background:silver"
+            div.addEventListener('dblclick', () => {
+                div.contentEditable = true;
+                htmlEditor.value = frameDocument.documentElement.innerHTML;
+            });
+/*             div.addEventListener('mousedown', () => {
+                isDragging = true;
+                offsetX = event.clientX - div.getBoundingClientRect().left;
+                offsetY = event.clientY - div.getBoundingClientRect().top;
+                console.log(window.getComputedStyle(frameDocument.body).cursor);
+            }); */
+            console.log("checkpoint 5");
+            frameDocument.addEventListener('mousemove', function(event) {
+                if (isDragging) {
+                    div.style.left = event.clientX - offsetX + 'px';
+                    div.style.top = event.clientY - offsetY + 'px';
+                }
+            });
+            frameDocument.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            frameDocument.body.appendChild(div);
+            var isDragging = false;
+            var offsetX, offsetY;
+            // Update the HTML edit window
+            htmlEditor.value = frameDocument.documentElement.innerHTML;
+        });
+        console.log("checkpoint 6");
+        //image add section
+        imageInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const frameDocument = frame.contentDocument;
+                const image = document.createElement('img');
+                image.src = URL.createObjectURL(file);
+                image.style="width:30%;height:auto;";
+                dragElement(image);
+                frameDocument.body.appendChild(image);
+                // Update the HTML edit window
+                htmlEditor.value = frameDocument.documentElement.innerHTML;
+            }
+        });
+        //image add section end
+        //cssEditor section
+        cssEditor.addEventListener('input', () => {
+            if (selectedElement) {
+                selectedElement.style.cssText = cssEditor.value;
+            }
+            frameDocument = frame.contentDocument;
+            htmlEditor.value = frameDocument.documentElement.innerHTML;
+        });
+       //cssEditor section end
+       console.log("checkpoint 7");
+        htmlEditor.addEventListener('input', () => {
+            frame.contentDocument.documentElement.innerHTML = htmlEditor.value;
+        });
+        /*----------------Right sidebar size maintainer-----------------*/
+
+        const container = document.getElementById('container');//move
+        function outputsize() {
+            let st="calc((100% - "+container.offsetWidth+"px) - 90px)";
+            siderbar2.style.width=st;
+        }
+        outputsize();
+        new ResizeObserver(outputsize).observe(container);
+        /*----------------Right sidebar size maintainer END-----------------*/
+        /*----------------Rulers script-----------------*/
+        console.log("checkpoint 8");
+        //list of guidelines
+        let guidelines = [];
+        function createGuideline(x, y, i) {
+            const guideline = document.createElement('div');
+            guideline.className = 'guideline guideline-'+i; // You can change to guideline-y for vertical guidelines
+            guideline.style.top = y + 'px';
+            guideline.style.left = x + 'px';
+            //add guideline to container div
+            container.appendChild(guideline);
+            //add guideline to list of guidelines
+            guidelines.push(guideline);
+            //make guideline dragable
+            dragElement(guideline);
+            //remove guideline event on right click
+            guideline.addEventListener('contextmenu', function (event) {
+                event.preventDefault();
+                guideline.remove();
+            });
+        }
+        console.log("checkpoint 9");
+        //create events on rulers to create guidelines
+        document.querySelectorAll('.ruler').forEach(function (ruler) {
+            ruler.addEventListener('click', function (event) {
+                const rect = container.getBoundingClientRect();
+                if (ruler.id === 'ruler-y') {
+                    createGuideline(0, event.clientY - rect.top, 'x');
+                } else if (ruler.id === 'ruler-x') {
+                    createGuideline(event.clientX - rect.left, 0, 'y');
+                }
+            });
+           
+        });
+        console.log("checkpoint 10");
+        /*----------------Rulers script end-----------------*/
+         /*----------------Drag script-----------------*/
+        function dragElement(elmnt) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  if (document.getElementById(elmnt.id + "header")) {
+    // if present, the header is where you move the DIV from:
+    document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+  } else {
+    // otherwise, move the DIV from anywhere inside the DIV:
+    elmnt.onmousedown = dragMouseDown;
+  }
+  console.log("checkpoint 11");
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+  console.log("checkpoint 12");
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    if(elmnt.classList.contains("guideline")){
+        console.log('Dragging guideline')
+	    if(elmnt.classList.contains("guideline-x")){
+	    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+	    }
+	    if(elmnt.classList.contains("guideline-y")){
+	    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+	    }
+	    }    
+    else{
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+  }
+  console.log("checkpoint 13");
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
+/*----------------Drag script end-----------------*/
+    </script>
+</body>
+</html>
