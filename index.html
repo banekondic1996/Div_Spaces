@@ -62,7 +62,8 @@ input{
             border: 1px solid #000;
             margin-top: 10px;
             border-radius:10px;
-
+            outline: none;
+            box-shadow: 0px 0px 7px 0px #454545;
         }
 
         #css-editor {
@@ -70,7 +71,9 @@ input{
             height: 40vh;
             border: 1px solid #000;
             margin-top: 10px;
-            border-radius:10px;    
+            border-radius:10px;  
+            outline: none;
+            box-shadow: 0px 0px 7px 0px #454545;  
         }
         .contextMenu{
             top:0px;
@@ -98,6 +101,7 @@ input{
                 border: 2px solid black;
                 overflow: hidden;
                 border-radius: 10px;
+                box-shadow: 0px 0px 7px 0px #454545;
         }
 
         .ruler {
@@ -189,10 +193,8 @@ input{
             <input type="file" id="openFileButton" style="opacity: 0;"  oninput="openFile(event)">
         </button>
         <button  class="sidebarButton" id="saveButton" onclick="saveEdits()"><img src="icons/save.png" alt="" srcset=""></button>
-
-        <!---<input type="color" id="color-picker"> -->
+        <input class="sidebarButton" type="color" id="color-picker">
     </div>
-    
         <div id="frame">
             <div id="container"><svg class="theGrid" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -212,31 +214,9 @@ input{
         </div>
         <input id="selectedElementFieldID" type="text" style="" disabled></input>
         </div>
-       
     </div>
-<!-- --------------Context Menus------------------- -->
-    <!-- <div id="contextMenuId2" class="contextMenu">
-        <button id="text-btn">TxT</button>
-        <button id="div-btn">Div</button>
-        <button id="table-btn">Tbl</button>
-        <button id="saveButton">SV</button>
-        <button>
-            <label for="image-input" class="btn">Img</label>
-            <input type="file" id="image-input" style="opacity: 0;">
-        </button>
-    </div> -->
-
-    <!-- <div id="contextMenuId" class="contextMenu">
-        <button>
-            <label for="color-picker" class="btn">Clr</label>
-            <input type="color" id="color-picker" style="opacity: 0;">
-    </button> 
-        <button onclick="selectedElement.remove();console.log('removed');console.log(selectedElement);">RM</button>
-        <button>CP</button>
-    </div> -->
-<!-- --------------Context Menus END------------------- -->
     <div id="sidebar2" style="position: absolute; right: 0px; width:100px; display: flex; top: 0px; background: gray; height: 100%; flex-direction: column;">
-        <textarea id="css-editor" placeholder="CSS Editor"></textarea><textarea id="html-editor" placeholder="HTML Editor" style=""></textarea>
+        <textarea id="css-editor" value="Styles:" placeholder="CSS Editor"></textarea><textarea id="html-editor" placeholder="HTML Editor" style=""></textarea>
     </div>
     <script>
         var frame = document.getElementById('frame-content');
@@ -245,9 +225,7 @@ input{
         var textButton = document.getElementById('text-btn');
         var divButton = document.getElementById('div-btn');
         var imageInput = document.getElementById('image-input');
-        /* const colorPicker = document.getElementById('color-picker'); */
- /*        const contextM=document.getElementById('contextMenuId');
-        const contextMG=document.getElementById('contextMenuId2'); */
+        const colorPicker = document.getElementById('color-picker');
         var siderbar2=document.getElementById('sidebar2');
         var openFileButtonElement=document.getElementById('openFileButton');
         var selectedElementFieldElement=document.getElementById('selectedElementFieldID');
@@ -265,77 +243,46 @@ input{
             const text = prompt('Enter text to add:');
             const frameDocument = frame.contentDocument;
             frameDocument.body.innerHTML += `<p>${text}</p>`;
-            
             // Update the HTML edit window
-            htmlEditor.value = frameDocument.documentElement.innerHTML;
+            htmlEditorUpdate()
         });
-  /*       colorPicker.addEventListener('input', () => {
-                console.log(selectedElement);
+        colorPicker.addEventListener('input', () => {
                 selectedElement.style.backgroundColor = colorPicker.value;
-        }); */
+                htmlEditorUpdate()
+                cssEditorUpdate();
+        });
         frame.onload = function() {
             var iframeDoc = frame.contentDocument || frame.contentWindow.document;
             var cssFormatedText;
-            frameDocument = frame.contentDocument;
-            htmlEditor.value = frameDocument.documentElement.innerHTML;
+            htmlEditorUpdate()
             console.log("frame loaded");
             // Add a click event listener to the iframe document
             iframeDoc.addEventListener('click', function(event) {
-               /*  contextM.style.display='none';
-                contextMG.style.display='none'; */
-                // Check if the clicked element is the type you want to target (e.g., "div")
                 if (event.target) {
                     let classesForSelected="";
-                    //var selectedColor = colorPicker.value;
+                    var selectedColor = colorPicker.value;
                     selectedElement=event.target;
                     var myArray=selectedElement.outerHTML.split(">");
                     selectedElementFieldElement.value=myArray[0]+">";
-                    console.log("element selected")
+     /*             console.log("element selected")
                     console.log(selectedElement);
-                    console.log(selectedElement.classList[0]);
-                    cssFormatedText=" "+selectedElement.style.cssText.replaceAll(';',';\n');
-                    cssEditor.value=cssFormatedText;
-                    selectedElement.classList.forEach(function(data){console.log("."+data);cssEditor.value+="\n"+getCSSForClass("."+data).replaceAll(';',';\n').replaceAll('{','{\n');});
-                    
+                    console.log(selectedElement.classList[0]); */
+                    cssEditorUpdate();
                 }
             });
-
+        }
             console.log("checkpoint 2");
-            //contextMenu section
-           /*  if (iframeDoc.addEventListener) {
-                iframeDoc.addEventListener('contextmenu', function(e) {
-                    if (event.target.tagName.toLowerCase() === 'div') {
-                        selectedElement=e.target;
-                        console.log("You've tried to open context menu"+e.clientY); //here you draw your own menu 
-                        if(e.clientY-40<0){
-                        contextM.style.top=e.clientY-10+'px';
-                        contextM.style.left=e.clientX+80+'px';
-                        }
-                        else{
-                        contextM.style.top=e.clientY-40+'px';
-                        contextM.style.left=e.clientX+'px';
-                        }
-                        contextM.style.display='flex';
-                e.preventDefault();
-                    }
-                    else{
-                        e.preventDefault();
-                        contextMG.style.top=e.clientY-40+'px';
-                        contextMG.style.left=e.clientX+'px';
-                        contextMG.style.display='flex';
-                    }
-                    
-                }, false);
-                } else {
-                    iframeDoc.attachEvent('oncontextmenu', function() {
-                    alert("You've tried to open context menu");
-                    window.event.returnValue = false;
-                });
-                }*/
-            }; 
-            //contextMenu section end
-            //Save section
-    console.log("checkpoint 3");
+          function cssEditorUpdate(){
+                    cssFormatedText=selectedElement.style.cssText.replaceAll(';',';\n')+"\n\nStyles:";
+                    frameDocument = frame.contentDocument;
+                    cssEditor.value=cssFormatedText;
+                    selectedElement.classList.forEach(function(data){console.log("."+data);cssEditor.value+="\n"+getCSSForClass("."+data).replaceAll(';',';\n').replaceAll('{','{\n');});
+          };
+          function htmlEditorUpdate(){
+            frameDocument = frame.contentDocument;
+            htmlEditor.value = frameDocument.documentElement.innerHTML;
+          };
+
 /*     function blobToBase64(blob) {
             return new Promise((resolve, _) => {
                 const reader = new FileReader();
@@ -363,6 +310,7 @@ input{
         saveFileElement.files = container.files;
         saveFileElement.append(blob);
     } */
+    console.log("checkpoint 3");
     const fs = require ('fs');
     async function saveEdits() 
       {
@@ -383,7 +331,6 @@ input{
       }
       function openFile(event){
         console.log("openFile");
-        
         frame.src=openFileButtonElement.files[0].path;
         currentPath=openFileButtonElement.files[0].path;
         console.log(openFileButtonElement.files[0]);
@@ -408,62 +355,6 @@ input{
     }
     return cssText;
 }
-function replaceCSSInHTML(className, newCSS) {
-    frameDocument = frame.contentDocument;
-    // Iterate through all <style> and <link> elements
-    for (let stylesheet of frameDocument.styleSheets) {
-        try {
-            if (stylesheet.ownerNode.tagName === 'STYLE') {
-                // If the stylesheet is within a <style> tag
-                for (let i = 0; i < stylesheet.cssRules.length; i++) {
-                    let rule = stylesheet.cssRules[i];
-                    if (rule.selectorText === className) {
-                        let cssText = rule.cssText;
-                        let styleTag = stylesheet.ownerNode;
-                        // Replace the entire rule with the new CSS
-                        styleTag.innerHTML = styleTag.innerHTML.replace(cssText, newCSS);
-                        return;
-                    }
-                }
-            } else if (stylesheet.ownerNode.tagName === 'LINK') {
-                // If the stylesheet is within a <link> tag, we need to fetch the CSS and replace it
-                fetch(stylesheet.href)
-                    .then(response => response.text())
-                    .then(cssText => {
-                        const newCssText = cssText.replace(new RegExp(`${className}[^}]*}`, 'g'), newCSS);
-                        // Create a new <style> tag with the updated CSS and replace the <link> tag
-                        const styleTag = document.createElement('style');
-                        styleTag.type = 'text/css';
-                        styleTag.innerHTML = newCssText;
-                        stylesheet.ownerNode.parentNode.replaceChild(styleTag, stylesheet.ownerNode);
-                    })
-                    .catch(e => console.error('Error fetching stylesheet: ', e));
-            }
-        } catch (e) {
-            console.error('Error accessing stylesheet: ', e);
-        }
-    }
-}
-function removeCSSForClass(className) {
-    // Iterate through all stylesheets
-    for (let stylesheet of frameDocument.styleSheets) {
-        // Some stylesheets may be from external domains, which will throw a CORS error. Ignore those.
-        try {
-            // Iterate through rules in reverse order to avoid issues with indexing when removing rules
-            for (let i = stylesheet.cssRules.length - 1; i >= 0; i--) {
-                let rule = stylesheet.cssRules[i];
-                if (rule.selectorText === className) {
-                    stylesheet.deleteRule(i);
-                }
-            }
-        } catch (e) {
-            console.error('Error accessing stylesheet: ', e);
-        }
-    }
-}
-function splitByEmptyNewLine(text) {
-    return text.split(/\n\s*\n/);
-}
 function extractCSSText(cssString) {
     const match = cssString.match(/\.([^}]*)\}/);
     if (match && match[1]) {
@@ -479,36 +370,15 @@ function trimCSSBlock(cssText, className) {
     }
     return '';
 }
+          console.log("checkpoint 5");
 //--------------------====-DIV add START------------------------------   
         divButton.addEventListener('click', () => {
             frameDocument = frame.contentDocument;
             const div = document.createElement('div');
             div.textContent = 'DIV element';
-            div.style="background:silver;width:50px;height:50px;"
-  /*           div.addEventListener('dblclick', () => {
-                div.contentEditable = true;
-                htmlEditor.value = frameDocument.documentElement.innerHTML;
-            }); */
-/*             div.addEventListener('mousedown', () => {
-                isDragging = true;
-                offsetX = event.clientX - div.getBoundingClientRect().left;
-                offsetY = event.clientY - div.getBoundingClientRect().top;
-                console.log(window.getComputedStyle(frameDocument.body).cursor);
-            }); */
-            console.log("checkpoint 5");
-/*             frameDocument.addEventListener('mousemove', function(event) {
-                if (isDragging) {
-                    div.style.left = event.clientX - offsetX + 'px';
-                    div.style.top = event.clientY - offsetY + 'px';
-                }
-            });
-            frameDocument.addEventListener('mouseup', function() {
-                isDragging = false;
-            });
-            var isDragging = false;
-            var offsetX, offsetY; */
+            div.style="background:white;width:50px;height:50px;"
             if(selectedElement){
-                selectedElement.appendChild(div);
+            selectedElement.appendChild(div);
             }
             else{
             frameDocument.body.appendChild(div);
@@ -516,7 +386,7 @@ function trimCSSBlock(cssText, className) {
             // Update the HTML edit window
             htmlEditor.value = frameDocument.documentElement.innerHTML;
         });
-
+            console.log("checkpoint 5");
 //---------------------DIV add END--------------------------
 
         console.log("checkpoint 6");
@@ -536,22 +406,39 @@ function trimCSSBlock(cssText, className) {
         });
         //image add section end
         //cssEditor section
-        cssEditor.addEventListener('input', () => {
-            if (selectedElement) {
-                selectedElement.style.cssText = cssEditor.value;
-                selectedElement.classList.forEach(function(style){var newStyle="."+style+trimCSSBlock(cssEditor.value,style)+"}";console.log(newStyle);});
-            }
+        var oldStyles="";
+            var newStyles="";
+            var newHTML="";
+            var rez="";
+            cssEditor.addEventListener('input', () => {
             frameDocument = frame.contentDocument;
-            htmlEditor.value = frameDocument.documentElement.innerHTML;
+            if (selectedElement) {
+                
+                selectedElement.classList.forEach(function(style){
+                newStyles="."+style+"{"+trimCSSBlock(cssEditor.value,style)+"}";
+                oldStyles="."+style+"{";
+                var text=htmlEditor.value;
+                htmlEditor.value = "";  
+                var splitex=text.split(oldStyles);
+                IndexAtSplit=splitex[1].indexOf("}")+1;
+                splitex[1]=splitex[1].substring(IndexAtSplit,);
+                for(let i=0;i<splitex.length;i++){
+                    if(i==0){rez=splitex[i]+newStyles;}
+                    else{rez=rez+splitex[i]}
+                };
+                selectedElement.style.cssText = cssEditor.value.split("Styles:")[0].replace(/\n/g, '');
+                htmlEditor.value = rez;  
+            });
+            }
+           
         });
        //cssEditor section end
-       console.log("checkpoint 7");
+        console.log("checkpoint 7");
         htmlEditor.addEventListener('input', () => {
             frame.contentDocument.documentElement.innerHTML = htmlEditor.value;
-            undoList.push(htmlEditor.value);
-            console.log("undo push");
-            console.log(undoList[0]);
-            console.log("frame changed");
+        });
+        cssEditor.addEventListener('input', () => {
+            frame.contentDocument.documentElement.innerHTML = htmlEditor.value;
         });
         /*----------------Right sidebar size maintainer-----------------*/
 
