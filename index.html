@@ -58,7 +58,7 @@ input{
 
         #html-editor {
             width: 85%;
-            height: calc(60vh - 97px);
+            height: calc(60vh - 120px);
             border: 1px solid #000;
             margin-top: 10px;
             border-radius:10px;
@@ -149,19 +149,46 @@ input{
             height: -webkit-fill-available;
             margin: 0px 20px 0px 0px;
         }
+        .sidebarButton{
+            padding:4px;
+        }
+        .sidebarButton img{
+            width: 100%;
+            height:100%;
+        }
+        #selectedElementFieldID{
+            height: 25px;
+            background: white;
+            z-index: 999;
+            position: absolute;
+            bottom: 17px;
+            left: 66px;
+            width: calc(100% - 520px);
+            border-radius:10px;
+        
+        }
     </style>
 </head>
 <body>
     <div id="sidebar">
         <div style="color:white;">Add:</div>
-        <button id="text-btn">TxT</button>
-        <button id="div-btn">Div</button>
-        <button>
-            <label for="image-input" class="btn">Img</label>
+        <button class="sidebarButton" id="div-btn"><img src="icons/div.png" alt="" srcset=""></button>
+        <button class="sidebarButton" id="text-btn"><img src="icons/text.png" alt="" srcset=""></button>
+        <button class="sidebarButton" id="input-btn"><img src="icons/input.png" alt="" srcset=""></button>
+        <button class="sidebarButton">
+            <label for="image-input" class="btn"><img src="icons/image.png" alt="" srcset=""></label>
             <input type="file" id="image-input" style="opacity: 0;">
         </button>
         <div style="color:white;">Other:</div>
-        <button id="saveButton">SV</button>
+        <button class="sidebarButton" id="putInButton"><img src="icons/putIn.png" alt="" srcset=""></button>
+        <div style="color:white;">Com:</div>
+        <button class="sidebarButton" id="undo-btn"><img src="icons/undo.png" alt="" srcset=""></button>
+        <button class="sidebarButton" id="redo-btn"><img src="icons/redo.png" alt="" srcset=""></button>
+        <button class="sidebarButton">
+            <label for="openFileButton" class="btn"><img src="icons/open.png" alt="" srcset=""></label>
+            <input type="file" id="openFileButton" style="opacity: 0;"  oninput="openFile(event)">
+        </button>
+        <button  class="sidebarButton" id="saveButton" onclick="saveEdits()"><img src="icons/save.png" alt="" srcset=""></button>
 
         <!---<input type="color" id="color-picker"> -->
     </div>
@@ -183,6 +210,7 @@ input{
             <div id="ruler-x" class="ruler"></div>
             <div id="ruler-y" class="ruler"></div>
         </div>
+        <input id="selectedElementFieldID" type="text" style="" disabled></input>
         </div>
        
     </div>
@@ -210,21 +238,24 @@ input{
     <div id="sidebar2" style="position: absolute; right: 0px; width:100px; display: flex; top: 0px; background: gray; height: 100%; flex-direction: column;">
         <textarea id="css-editor" placeholder="CSS Editor"></textarea><textarea id="html-editor" placeholder="HTML Editor" style=""></textarea>
     </div>
-    <input type="file" nwsaveas>
     <script>
-        const frame = document.getElementById('frame-content');
-        const htmlEditor = document.getElementById('html-editor');
-        const cssEditor = document.getElementById('css-editor');
-        const textButton = document.getElementById('text-btn');
-        const divButton = document.getElementById('div-btn');
-        const imageInput = document.getElementById('image-input');
+        var frame = document.getElementById('frame-content');
+        var htmlEditor = document.getElementById('html-editor');
+        var cssEditor = document.getElementById('css-editor');
+        var textButton = document.getElementById('text-btn');
+        var divButton = document.getElementById('div-btn');
+        var imageInput = document.getElementById('image-input');
         /* const colorPicker = document.getElementById('color-picker'); */
  /*        const contextM=document.getElementById('contextMenuId');
         const contextMG=document.getElementById('contextMenuId2'); */
-        const siderbar2=document.getElementById('sidebar2');
+        var siderbar2=document.getElementById('sidebar2');
+        var openFileButtonElement=document.getElementById('openFileButton');
+        var selectedElementFieldElement=document.getElementById('selectedElementFieldID');
+        var currentPath="";
         var frameDocument = frame.contentDocument;
         var selectedElement = null;
-
+        var undoList=[];
+        
 //---------------------------drag space-----------------------------
 
 
@@ -245,21 +276,30 @@ input{
         frame.onload = function() {
             var iframeDoc = frame.contentDocument || frame.contentWindow.document;
             var cssFormatedText;
+            frameDocument = frame.contentDocument;
+            htmlEditor.value = frameDocument.documentElement.innerHTML;
             console.log("frame loaded");
             // Add a click event listener to the iframe document
             iframeDoc.addEventListener('click', function(event) {
                /*  contextM.style.display='none';
                 contextMG.style.display='none'; */
                 // Check if the clicked element is the type you want to target (e.g., "div")
-                if (event.target.tagName.toLowerCase() === 'div') {
+                if (event.target) {
+                    let classesForSelected="";
                     //var selectedColor = colorPicker.value;
                     selectedElement=event.target;
+                    var myArray=selectedElement.outerHTML.split(">");
+                    selectedElementFieldElement.value=myArray[0]+">";
                     console.log("element selected")
                     console.log(selectedElement);
+                    console.log(selectedElement.classList[0]);
                     cssFormatedText=" "+selectedElement.style.cssText.replaceAll(';',';\n');
                     cssEditor.value=cssFormatedText;
+                    selectedElement.classList.forEach(function(data){console.log("."+data);cssEditor.value+="\n"+getCSSForClass("."+data).replaceAll(';',';\n').replaceAll('{','{\n');});
+                    
                 }
             });
+
             console.log("checkpoint 2");
             //contextMenu section
            /*  if (iframeDoc.addEventListener) {
@@ -295,12 +335,16 @@ input{
             }; 
             //contextMenu section end
             //Save section
-        saveButton.addEventListener('click', function () {
-        saveEdits();
-        //Save section end
-    });
     console.log("checkpoint 3");
-    function saveEdits(){
+/*     function blobToBase64(blob) {
+            return new Promise((resolve, _) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+            } */
+/*     function saveEditsNoNW(){
+        const saveFileElement=document.getElementById('saveFile');
         const blob = new Blob([htmlEditor.value], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -309,24 +353,142 @@ input{
         a.style.display = 'none';
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
-    }
-
+        window.URL.revokeObjectURL(url);             
+        console.log(blob);
+        let file = new File([blob], "test.html",{type:"text/html", lastModified:new Date().getTime()});
+        console.log("the file");
+        console.log(file);
+        let container = new DataTransfer();
+        container.items.add(file);
+        saveFileElement.files = container.files;
+        saveFileElement.append(blob);
+    } */
+    const fs = require ('fs');
+    async function saveEdits() 
+      {
+        console.log(currentPath);
+        fs.copyFile(currentPath, currentPath+'_backup.html', (err) => 
+        {
+          if (err) {console.error('Error copying file:', err);} 
+          else {console.log('File copied successfully!');}
+        });
+        frameDocument = frame.contentDocument;
+        htmlEditor.value = frameDocument.documentElement.innerHTML;
+        let htmlText=htmlEditor.value;
+        setTimeout(() => {
+          fs.writeFileSync(currentPath,htmlText) //change for distribution
+        console.log(htmlText);
+        alert("Update complete. Restart the app to see changes");
+       }, 400);
+      }
+      function openFile(event){
+        console.log("openFile");
+        
+        frame.src=openFileButtonElement.files[0].path;
+        currentPath=openFileButtonElement.files[0].path;
+        console.log(openFileButtonElement.files[0]);
+      }
     console.log("checkpoint 4");
-//div create section
+
+    function getCSSForClass(className) {
+    frameDocument = frame.contentDocument;
+    let cssText = '';
+    // Iterate through all stylesheets
+    for (let stylesheet of frameDocument.styleSheets) {
+        // Some stylesheets may be from external domains, which will throw a CORS error. Ignore those.
+        try {
+            for (let rule of stylesheet.cssRules || stylesheet.rules) {
+                if (rule.selectorText === className) {
+                    cssText += rule.cssText + '\n';
+                }
+            }
+        } catch (e) {
+            console.error('Error accessing stylesheet: ', e);
+        }
+    }
+    return cssText;
+}
+function replaceCSSInHTML(className, newCSS) {
+    frameDocument = frame.contentDocument;
+    // Iterate through all <style> and <link> elements
+    for (let stylesheet of frameDocument.styleSheets) {
+        try {
+            if (stylesheet.ownerNode.tagName === 'STYLE') {
+                // If the stylesheet is within a <style> tag
+                for (let i = 0; i < stylesheet.cssRules.length; i++) {
+                    let rule = stylesheet.cssRules[i];
+                    if (rule.selectorText === className) {
+                        let cssText = rule.cssText;
+                        let styleTag = stylesheet.ownerNode;
+                        // Replace the entire rule with the new CSS
+                        styleTag.innerHTML = styleTag.innerHTML.replace(cssText, newCSS);
+                        return;
+                    }
+                }
+            } else if (stylesheet.ownerNode.tagName === 'LINK') {
+                // If the stylesheet is within a <link> tag, we need to fetch the CSS and replace it
+                fetch(stylesheet.href)
+                    .then(response => response.text())
+                    .then(cssText => {
+                        const newCssText = cssText.replace(new RegExp(`${className}[^}]*}`, 'g'), newCSS);
+                        // Create a new <style> tag with the updated CSS and replace the <link> tag
+                        const styleTag = document.createElement('style');
+                        styleTag.type = 'text/css';
+                        styleTag.innerHTML = newCssText;
+                        stylesheet.ownerNode.parentNode.replaceChild(styleTag, stylesheet.ownerNode);
+                    })
+                    .catch(e => console.error('Error fetching stylesheet: ', e));
+            }
+        } catch (e) {
+            console.error('Error accessing stylesheet: ', e);
+        }
+    }
+}
+function removeCSSForClass(className) {
+    // Iterate through all stylesheets
+    for (let stylesheet of frameDocument.styleSheets) {
+        // Some stylesheets may be from external domains, which will throw a CORS error. Ignore those.
+        try {
+            // Iterate through rules in reverse order to avoid issues with indexing when removing rules
+            for (let i = stylesheet.cssRules.length - 1; i >= 0; i--) {
+                let rule = stylesheet.cssRules[i];
+                if (rule.selectorText === className) {
+                    stylesheet.deleteRule(i);
+                }
+            }
+        } catch (e) {
+            console.error('Error accessing stylesheet: ', e);
+        }
+    }
+}
+function splitByEmptyNewLine(text) {
+    return text.split(/\n\s*\n/);
+}
+function extractCSSText(cssString) {
+    const match = cssString.match(/\.([^}]*)\}/);
+    if (match && match[1]) {
+        return match[1].trim();
+    }
+    return '';
+}
+function trimCSSBlock(cssText, className) {
+    const pattern = new RegExp(`\\.${className}\\s*{([^}]*)}`);
+    const match = cssText.match(pattern);
+    if (match && match[1]) {
+        return match[1].trim();
+    }
+    return '';
+}
+//--------------------====-DIV add START------------------------------   
         divButton.addEventListener('click', () => {
             frameDocument = frame.contentDocument;
             const div = document.createElement('div');
-            /* contextMG.style.display='none';
-            div.top=contextMG.style.top;
-            div.left=contextMG.style.left;
-            console.log(contextMG.style.top); */
-            div.textContent = 'element';
-            div.style="position:absolute;resize:both;cursor:move;overflow:hidden;background:silver"
-            div.addEventListener('dblclick', () => {
+            div.textContent = 'DIV element';
+            div.style="background:silver;width:50px;height:50px;"
+  /*           div.addEventListener('dblclick', () => {
                 div.contentEditable = true;
                 htmlEditor.value = frameDocument.documentElement.innerHTML;
-            });
+            }); */
 /*             div.addEventListener('mousedown', () => {
                 isDragging = true;
                 offsetX = event.clientX - div.getBoundingClientRect().left;
@@ -334,7 +496,7 @@ input{
                 console.log(window.getComputedStyle(frameDocument.body).cursor);
             }); */
             console.log("checkpoint 5");
-            frameDocument.addEventListener('mousemove', function(event) {
+/*             frameDocument.addEventListener('mousemove', function(event) {
                 if (isDragging) {
                     div.style.left = event.clientX - offsetX + 'px';
                     div.style.top = event.clientY - offsetY + 'px';
@@ -343,12 +505,20 @@ input{
             frameDocument.addEventListener('mouseup', function() {
                 isDragging = false;
             });
-            frameDocument.body.appendChild(div);
             var isDragging = false;
-            var offsetX, offsetY;
+            var offsetX, offsetY; */
+            if(selectedElement){
+                selectedElement.appendChild(div);
+            }
+            else{
+            frameDocument.body.appendChild(div);
+            }
             // Update the HTML edit window
             htmlEditor.value = frameDocument.documentElement.innerHTML;
         });
+
+//---------------------DIV add END--------------------------
+
         console.log("checkpoint 6");
         //image add section
         imageInput.addEventListener('change', (event) => {
@@ -369,6 +539,7 @@ input{
         cssEditor.addEventListener('input', () => {
             if (selectedElement) {
                 selectedElement.style.cssText = cssEditor.value;
+                selectedElement.classList.forEach(function(style){var newStyle="."+style+trimCSSBlock(cssEditor.value,style)+"}";console.log(newStyle);});
             }
             frameDocument = frame.contentDocument;
             htmlEditor.value = frameDocument.documentElement.innerHTML;
@@ -377,6 +548,10 @@ input{
        console.log("checkpoint 7");
         htmlEditor.addEventListener('input', () => {
             frame.contentDocument.documentElement.innerHTML = htmlEditor.value;
+            undoList.push(htmlEditor.value);
+            console.log("undo push");
+            console.log(undoList[0]);
+            console.log("frame changed");
         });
         /*----------------Right sidebar size maintainer-----------------*/
 
