@@ -426,7 +426,9 @@ function trimCSSBlock(cssText, className) {
                     if(i==0){rez=splitex[i]+newStyles;}
                     else{rez=rez+splitex[i]}
                 };
-                selectedElement.style.cssText = cssEditor.value.split("Styles:")[0].replace(/\n/g, '');
+                selectedElement.style.cssText = " ";
+                var txt=cssEditor.value.split("Styles:")[0];
+                selectedElement.style=txt;
                 htmlEditor.value = rez;  
             });
             }
