@@ -1,5 +1,5 @@
 Not really being worked on. I got so angry at Google Chrome not saving when inspecting the page, so i made this.
-Uploaded program is just preview of editor
+Uploaded program is just preview of editor. It uses NW.JS, i haven't uploaded package.json it only needs nw.js for now
 
 Needs to be done:
 1. Text editor that supports code syntax
